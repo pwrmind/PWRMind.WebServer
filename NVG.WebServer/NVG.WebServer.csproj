@@ -53,10 +53,14 @@
     <Folder Include="processedFiles\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="sourceFiles\mydata.xml">
+    <Content Include="sourceFiles\employees.xslt" />
+    <Content Include="sourceFiles\organizations.xslt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sourceFiles\mydata.xslt">
+    <Content Include="sourceFiles\peoples.xslt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sourceFiles\services.xslt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
