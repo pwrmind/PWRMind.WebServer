@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
@@ -27,24 +29,36 @@ namespace NVG.WebServer
             while (Console.Read() != 'q') ;
         }
         
-        private static string GetResponse(string request)
+        private static string GetResponse(string request, NameValueCollection parameters)
         {
             string response = string.Empty;
 
             using (var connection = new SqlConnection("Data Source=TFS01;Initial Catalog=Rosbank;Integrated Security=True"))
             using (var command = new SqlCommand(request, connection) { CommandType = CommandType.StoredProcedure })
             {
+                if (parameters.Count > 0)
+                {
+                    foreach (string name in parameters)
+                    {
+                        if (name != null)
+                        {
+                            SqlParameter parameter = new SqlParameter("@" + name.ToUpper(), parameters[name]);
+                            command.Parameters.Add(parameter);
+                        }
+                    }                    
+                }
+
                 connection.Open();
                 using (XmlReader reader = command.ExecuteXmlReader())
                 {
-                    response = Transform(request, reader);
+                    response = Transform(request, reader, parameters);
                 }
                 connection.Close();
             }
             return response;
         }
 
-        private static string Transform(string request, XmlReader reader)
+        private static string Transform(string request, XmlReader reader, NameValueCollection parameters)
         {
             StringBuilder result = new StringBuilder();
             try
@@ -59,7 +73,23 @@ namespace NVG.WebServer
 
                     transform.Load(".\\sourceFiles\\" + request + ".xslt", settings, null);
 
-                    transform.Transform(doc, writer);
+                    if (parameters.Count > 0)
+                    {
+                        XsltArgumentList arguments = new XsltArgumentList();
+                        foreach (string name in parameters)
+                        {
+                            if (name != null)
+                            {
+                                arguments.AddParam(name.ToUpper(), string.Empty, parameters[name]);
+                            }
+                        }
+
+                        transform.Transform(doc, arguments, writer);
+                    }
+                    else
+                    {
+                        transform.Transform(doc, writer);
+                    }
                 }
             }
             catch (Exception ex)
@@ -75,7 +105,7 @@ namespace NVG.WebServer
         {
             string prefix = "http://*:8080/";
             server = new HttpListener();
-
+            
             if (!HttpListener.IsSupported) return;
 
             if (string.IsNullOrEmpty(prefix))
@@ -91,9 +121,12 @@ namespace NVG.WebServer
                 HttpListenerRequest request = context.Request;
                 Console.WriteLine(request.RawUrl);
                 string vm = request.Url.Segments[1].TrimEnd(new char[] { '/' });
+
+                var queryString = HttpUtility.ParseQueryString(request.Url.Query);
+
                 if (vm != "favicon.ico")
                 {
-                    SendResponse(context, GetResponse(vm));
+                    SendResponse(context, GetResponse(vm, queryString));
                 }               
             }
         }

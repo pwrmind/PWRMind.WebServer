@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,9 +50,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="processedFiles\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="sourceFiles\employees.xslt" />
     <Content Include="sourceFiles\organizations.xslt">
@@ -60,6 +59,7 @@
     <Content Include="sourceFiles\peoples.xslt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="sourceFiles\peoples_and_services.xslt" />
     <Content Include="sourceFiles\services.xslt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
