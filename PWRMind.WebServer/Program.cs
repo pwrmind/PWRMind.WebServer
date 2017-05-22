@@ -15,7 +15,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
-namespace NVG.WebServer
+namespace PWRMind.WebServer
 {
     class Program
     {
@@ -33,7 +33,7 @@ namespace NVG.WebServer
         {
             string response = string.Empty;
 
-            using (var connection = new SqlConnection("Data Source=TFS01;Initial Catalog=Rosbank;Integrated Security=True"))
+            using (var connection = new SqlConnection(Properties.Settings.Default.DatabaseConnectingString))
             using (var command = new SqlCommand(request, connection) { CommandType = CommandType.StoredProcedure })
             {
                 if (parameters.Count > 0)
@@ -64,7 +64,6 @@ namespace NVG.WebServer
             try
             {
                 XPathDocument doc = new XPathDocument(reader);
-
                 using (XmlWriter writer = XmlWriter.Create(result))
                 {
                     XslCompiledTransform transform = new XslCompiledTransform();
@@ -111,7 +110,7 @@ namespace NVG.WebServer
             if (string.IsNullOrEmpty(prefix))
                 throw new ArgumentException("prefix");
             server.Prefixes.Add(prefix);
-
+            server.AuthenticationSchemes = AuthenticationSchemes.Ntlm;
             server.Start();
             Console.WriteLine("Server started...");
 
@@ -119,6 +118,10 @@ namespace NVG.WebServer
             {
                 HttpListenerContext context = server.GetContext();
                 HttpListenerRequest request = context.Request;
+                if (request.HttpMethod == "POST")
+                {
+
+                }
                 Console.WriteLine(request.RawUrl);
                 string vm = request.Url.Segments[1].TrimEnd(new char[] { '/' });
 
